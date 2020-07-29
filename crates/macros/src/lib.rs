@@ -120,39 +120,19 @@ pub fn build(stream: TokenStream) -> TokenStream {
 
     let tokens = quote! {
         fn build() {
-            use ::std::io::Write;
             let mut path = ::std::path::PathBuf::from(
                 ::std::env::var("OUT_DIR").expect("No `OUT_DIR` env variable set"),
             );
 
             path.push("winrt.rs");
-            let mut file = ::std::fs::File::create(&path).expect("Failed to create winrt.rs");
+            ::std::fs::write(&path, #tokens).expect("Failed to create winrt.rs");
 
             let mut cmd = ::std::process::Command::new("rustfmt");
-            cmd.arg("--emit").arg("stdout");
-            cmd.stdin(::std::process::Stdio::piped());
-            cmd.stdout(::std::process::Stdio::piped());
-            {
-                let child = cmd.spawn().unwrap();
-                let mut stdin = child.stdin.unwrap();
-                let stdout = child.stdout.unwrap();
-
-                let t = ::std::thread::spawn(move || {
-                    let mut s = stdout;
-                    ::std::io::copy(&mut s, &mut file).unwrap();
-                });
-
-                #change_if
-
-                writeln!(&mut stdin, "{}", #tokens).unwrap();
-                // drop stdin to close that end of the pipe
-                ::std::mem::drop(stdin);
-
-                t.join().unwrap();
-            }
-
+            cmd.arg(path);
             let status = cmd.status().unwrap();
             assert!(status.success(), "Could not successfully build");
+
+            #change_if
         }
     };
     tokens.into()
