@@ -89,10 +89,17 @@ pub use runtime::*;
 pub use runtime_name::RuntimeName;
 #[doc(hidden)]
 pub use runtime_type::RuntimeType;
-pub use winrt_macros::{build, import};
+pub use winrt_macros::{build, implements, import};
 
 #[doc(hidden)]
 pub type RawPtr = *mut std::ffi::c_void;
 
 #[doc(hidden)]
 pub use const_sha1::ConstBuffer;
+
+#[implements(
+    windows::foundation::Uri,
+    windows::foundation::IStringable,
+    windows::foundation::{IClosable, IPropertyValue}
+)]
+pub struct Thing {}

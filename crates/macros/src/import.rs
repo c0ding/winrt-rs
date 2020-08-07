@@ -1,3 +1,4 @@
+use crate::namespace_literal_to_rough_namespace;
 use proc_macro2::Span;
 use rayon::iter::ParallelIterator;
 use syn::parse::{self, Parse, ParseStream};
@@ -244,30 +245,16 @@ impl TryFrom<syn::UseTree> for TypesDeclaration {
 impl Parse for TypesDeclarations {
     fn parse(input: ParseStream) -> parse::Result<Self> {
         let mut limits = BTreeSet::new();
-        loop {
-            if input.is_empty() {
-                break;
-            }
 
+        while !input.is_empty() {
             let use_tree: syn::UseTree = input.parse()?;
             let limit: TypesDeclaration = use_tree.try_into()?;
 
             limits.insert(limit);
         }
+
         Ok(Self(limits))
     }
-}
-
-// Snake <-> camel casing is lossy so we go for character but not case conversion
-// and deal with casing once we have an index of namespaces to compare against.
-fn namespace_literal_to_rough_namespace(namespace: &str) -> String {
-    let mut result = String::with_capacity(namespace.len());
-    for c in namespace.chars() {
-        if c != '"' && c != '_' {
-            result.extend(c.to_lowercase());
-        }
-    }
-    result
 }
 
 fn use_tree_to_namespace_types(use_tree: &syn::UseTree) -> parse::Result<NamespaceTypes> {
