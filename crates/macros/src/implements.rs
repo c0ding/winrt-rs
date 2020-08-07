@@ -83,6 +83,15 @@ fn use_tree_to_types(reader: &TypeReader, tree: &UseTree, types: &mut Vec<Type>)
                 };
 
                 types.push(Type::from_type_def(reader, *def));
+
+                // TODO
+                // If type is a class, add any required interfaces.
+                // If type is an interface, add any required interfaces.
+                // If any other kind of type, return an error.
+                // There may also be at most one class being implemented
+                // but any number of interfaces.
+                //
+
                 println!("implement: {}.{}", def.name(reader).0, def.name(reader).1);
             }
             UseTree::Glob(glob) => {
